@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Read Metadata from PDF with pdf.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+</head>
+
+<body>
+    <input type="file" id="pdfFile" accept=".pdf" onchange="handlePDFUpload()">
+</body>
+<script>
+    async function handlePDFUpload() {
+        const fileInput = document.getElementById('pdfFile');
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = async function (e) {
+                const pdfData = await new Uint8Array(e.target.result);
+                await pdfjsLib.getDocument({ data: pdfData }).promise.then(async function (pdfDocument) {
+                    // Access metadata properties
+                    const info = pdfDocument.pdfInfo;
+                    const meta = await pdfDocument.getMetadata();
+                    if (meta.info) {
+                        if (meta.info.Keywords) {
+                            console.log(meta.info.Keywords.split(/,\s+/g))
+                        }
+                        console.info(meta.info)
+                        /*console.log('Title:', info.Title);
+                        console.log('Author:', info.Author);
+                        console.log('Subject:', info.Subject);
+                        console.log('Keywords:', info.Keywords);
+                        console.log('Creator:', info.Creator);
+                        console.log('Producer:', info.Producer);
+                        console.log('Creation Date:', info.CreationDate);
+                        console.log('Modification Date:', info.ModDate);*/
+                    }
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    }
+</script>
